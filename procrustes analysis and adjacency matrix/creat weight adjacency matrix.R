@@ -26,9 +26,11 @@ raw_coord=array(sapply(shape_files,function(x) t(vcgPlyRead(x, updateNormals = T
 
 #get coordinates after Procrustes analysis
 #https://sabifo4.github.io/blog/Morphometrics_and_Procrustes_alignment 
-coords=geomorph::gpagen(shapes)$coords
 
-saveRDS(coords,'\\\\fs2-vip/students/wenboz4/Desktop/high dimension project/DataAD/coords.rds')
+##this step takes a long time, so save the result and use it later
+
+#coords=geomorph::gpagen(shapes)$coords
+#saveRDS(coords,'\\\\fs2-vip/students/wenboz4/Desktop/high dimension project/DataAD/coords.rds')
 
 
 
@@ -48,6 +50,13 @@ coord=rbind(coords[,,1],coords[,,2])
 scatter3d(x = coord[,1], y = coord[,2], z = coord[,3],
           groups=group, surface=FALSE)
 
+
+## sanity check: visualize transformed brains
+for(i in 1:20){
+  scatter3d(x = coords[,1,i], y = coords[,2,i], z = coords[,3,i],
+            surface=FALSE)
+  Sys.sleep(6)
+}
 
 
 ######################################################################
