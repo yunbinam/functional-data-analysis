@@ -108,4 +108,5 @@ for(i in 1:nrow(edge)){
 }
 
 #create weighted adjacency matrix
-wei_adj=sparseMatrix(i=edge[,1],j=edge[,2],x=distance)
+wei_adj=sparseMatrix(i=edge[,1],j=edge[,2],x=distance,symmetric = TRUE)
+
