@@ -3,7 +3,7 @@ library(rgl)
 library(shapes)
 library(Matrix)
 
-# setwd('brain')
+# setwd('DataAD/DataOut')
 
 ######################################################################
 # 1. Load coordinates for each subject
