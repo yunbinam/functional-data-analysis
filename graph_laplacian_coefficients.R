@@ -4,6 +4,7 @@ library(shapes)
 library(Matrix)
 library(dplyr)
 library(igraph)
+
 setwd('/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain-master/az_and_coords/brain/DataAD/DataOut')
 
 p=32492
@@ -40,7 +41,7 @@ fdata = t(sapply(df$tfiles, function(x) as.matrix(read.csv(x, header = F))))
 # the order of 3 points for each triangle tells where the normal direction is going
 # so reordering of points can change the normal direction 
 # Let each edge in the graph have an arbitrary but fixed orientation. It plays role in constructing the incidence matrix.
-edge = matrix(0, nrow=nrow(trg)*3, ncol=2)
+edge = matrix(0, nrow=nrow(trg)*3, ncol=2) # (64980*3) directed edges
 k = 1
 for (i in 1:nrow(trg)){
         tmp = trg[i,]
@@ -54,6 +55,8 @@ for (i in 1:nrow(trg)){
         edge[k,2] = tmp[1]
         k = k+1
 }
+edge_unq = t(apply(edge,1,sort))
+edge_unq = unique(edge_unq) # (64980*3/2) undirected edges
 
 # distance weight
 # weight defined by Gaussian kernel? 
@@ -82,7 +85,14 @@ lambda = c(1, 10, 100)
 beta_lpl = sapply(lambda, FUN=function(x) solve(t(fdata) %*% fdata + x*lpl) %*% t(fdata) %*% y)
 yhat = fdata %*% beta_lpl
 
-# incidence matrix 
+# 2/3 training data, 1/3 test data
+train = sample(1:nrow(df), size=2/3*nrow(df))
+test = -train
+f_train = fdata[train,]
+y_train = matrix(y[train,], nrow=length(train))
+beta_lpl_1 = solve(t(f_train) %*% f_train + 1*lpl) %*% t(f_train) %*% y_train
+
+# incidence matrix
 # (64980*3) OR (64980*3/2)? edges & direction?
 
 # y (Y), fdata (X), template, trg (penalty)
