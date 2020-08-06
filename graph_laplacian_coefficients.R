@@ -5,6 +5,8 @@ library(Matrix)
 library(dplyr)
 library(igraph)
 
+# grp C: control, NAD: Non Alz but with Symptom, AD: Alz with symp, PD: Parkinson disease
+# y: age - remove mean (intercept)
 setwd('/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain-master/az_and_coords/brain/DataAD/DataOut')
 
 p=32492
@@ -17,6 +19,8 @@ az = read.csv('DXSUM_PDXCONV_ADNIALL.csv', header=TRUE)
 az_dgn = az[az$VISCODE=="bl", c("RID", "VISCODE", "DXCURREN")]
 az_dgn = az_dgn[az_dgn$RID %in% rid, ]
 y = matrix(az_dgn$DXCURREN, nrow=nrow(az_dgn)) # 88*1 vector
+
+
 
 df = data.frame(rid = rid, sfiles = shape_files, tfiles = thickness_files)
 df = df[df$rid %in% az_dgn$RID,]
@@ -90,9 +94,13 @@ train = sample(1:nrow(df), size=2/3*nrow(df))
 test = -train
 f_train = fdata[train,]
 y_train = matrix(y[train,], nrow=length(train))
-beta_lpl_1 = solve(t(f_train) %*% f_train + 1*lpl) %*% t(f_train) %*% y_train
+beta_lpl_1 = solve(t(f_train) %*% f_train + 1*lpl) %*% t(f_train) %*% y_train # lambda 1
+yhat_test = fdata[test,] %*% beta_lpl
+
+# regression - try with age
 
 # incidence matrix
 # (64980*3) OR (64980*3/2)? edges & direction?
 
 # y (Y), fdata (X), template, trg (penalty)
+
