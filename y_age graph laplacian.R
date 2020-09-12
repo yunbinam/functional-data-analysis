@@ -31,16 +31,7 @@ age = age[-88,]
 y_age_raw = matrix(age$Age, nrow=nrow(age))
 y_age = matrix(age$Age-mean(age$Age), nrow=nrow(age))
 
-#####################################################################
-az = read.csv('DXSUM_PDXCONV_ADNIALL.csv', header=TRUE)
-az_age = az[az$VISCODE=="bl", c("RID", "VISCODE", "DXCURREN")]
-az_age = az_age[az_age$RID %in% age$Subject, ]
-
-# Why different ???
-table(az_age$DXCURREN)
-table(age$Grp)
-#####################################################################
-
+# match "rid" in files
 df = data.frame(rid = rid, sfiles = shape_files, tfiles = thickness_files)
 df = df[df$rid %in% age$Subject,]
 
