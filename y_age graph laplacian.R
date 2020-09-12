@@ -6,8 +6,7 @@ library(dplyr)
 library(igraph)
 library(PEIP)
 
-setwd('/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain-master/az_and_coords/brain/DataAD/DataOut')
-setwd('DataOut_C')
+setwd('/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain-master/az_and_coords/brain/DataAD/DataOut/DataOut_C')
 
 p=32492
 shape_files = grep('^A.+L\\.midthickness\\.32k_fs_LR\\.ply$', list.files(), value=TRUE)
@@ -29,6 +28,7 @@ age = age[-64,]
 age = age[-88,]
 
 # y: age - remove mean (intercept)
+y_age_raw = matrix(age$Age, nrow=nrow(age))
 y_age = matrix(age$Age-mean(age$Age), nrow=nrow(age))
 
 #####################################################################
@@ -60,6 +60,11 @@ trg = t(vcgPlyRead('A0002.L.midthickness.32k_fs_LR.ply', updateNormals = TRUE, c
 
 # f values (thickness) (87 subjects * 32492 nodes)
 fdata = t(sapply(df$tfiles, function(x) as.matrix(read.csv(x, header = F))))
+
+# create the matrix
+A = cbind(y_age_raw, fdata) # 87 subjects * (1st age + f at 32492 nodes)
+rownames(A) = df[,"rid"]
+saveRDS(A, 'A.rds')
 
 # egde set ((64980*3/2) undirected edges)
 edge = matrix(0, nrow=nrow(trg)*3, ncol=2) # (64980*3) directed edges
