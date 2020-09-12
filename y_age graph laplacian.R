@@ -7,12 +7,13 @@ library(igraph)
 library(PEIP)
 
 setwd('/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain-master/az_and_coords/brain/DataAD/DataOut')
+setwd('DataOut_C')
 
 p=32492
 shape_files = grep('^A.+L\\.midthickness\\.32k_fs_LR\\.ply$', list.files(), value=TRUE)
 thickness_files = grep('^A.+L\\.thickness\\.32k_fs_LR\\.func\\.1D', list.files(), value=TRUE)
 rid = gsub(".L.+", "", shape_files)
-rid = as.numeric(gsub("A0+", "", rid))
+rid = as.numeric(gsub("A0*", "", rid))
 
 # regression setting with age variable
 # predict age given the cortical thickness (the older, the thinner - furthermore, which specific part of brain is going to be thin or stable)
@@ -22,8 +23,12 @@ age = age[grep("A0*", age$Subject),]
 age = age %>% 
         mutate(Subject=as.numeric(gsub("A0*","",Subject))) %>%
         arrange(age, Subject)
-age = age[(age$Grp=="C") & (age$Subject %in% rid), ] # only 12 matched subjects
-# y: age - remove mean (intercept)?
+age = age[age$Subject %in% rid, ]
+which(table(age$Subject)==2) # There are 2 rows for subject 4403 and 5040
+age = age[-64,]
+age = age[-88,]
+
+# y: age - remove mean (intercept)
 y_age = matrix(age$Age-mean(age$Age), nrow=nrow(age))
 
 #####################################################################
@@ -53,7 +58,7 @@ template = proc$mshape # 32492*3 (coordinates of nodes)
 # triangle mesh (64980 triangles * 3 nodes)
 trg = t(vcgPlyRead('A0002.L.midthickness.32k_fs_LR.ply', updateNormals = TRUE, clean = TRUE)$it)
 
-# f values (thickness) (53 subjects * 32492 nodes)
+# f values (thickness) (87 subjects * 32492 nodes)
 fdata = t(sapply(df$tfiles, function(x) as.matrix(read.csv(x, header = F))))
 
 # egde set ((64980*3/2) undirected edges)
@@ -104,12 +109,11 @@ lpl = laplacian_matrix(graph_obj)
 # yhat = fdata %*% beta_lpl
 #####################################################################
 
-# too less subject to separate into train/test dataset
 # 2/3 training data, 1/3 test data
-# train = sample(1:nrow(df), size=2/3*nrow(df))
-# test = -train
-# f_train = fdata[train,]
-# y_train = matrix(y_age[train,], nrow=length(train))
+train = sample(1:nrow(df), size=2/3*nrow(df))
+test = -train
+f_train = fdata[train,]
+y_train = matrix(y_age[train,], nrow=length(train))
 
 # take too long time to run
 # beta_lpl_1 = solve(t(f_train) %*% f_train + 1*lpl) %*% t(f_train) %*% y_train # lambda 1
