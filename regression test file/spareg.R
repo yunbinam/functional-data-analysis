@@ -1,9 +1,9 @@
 # Arguments:
 # Y:            n by 1 vector of the response variable.
-# X:            n (number of rows) by p (number of columns) design matrix.
-# L:            p by p symmetric matrix of the penalty weighted laplacian matrix.
-# lambda.L:     tuning parameters of the penalty weighted laplacian matrix.
-# lambda.1:     tuning parameters of the L_1 penalty.
+# X:            n (number of rows) by p (number of columns) data matrix.
+# R0:           p by p symmetric matrix of mass matrix.
+# R1:           p by p symmetric matrix of stiff matrix.
+# lambda:     tuning parameters of the penalty.
 # ----------------------------------------------------------------------------
 # Outputs:
 # intercept:    intercept of the linear regression model.
