@@ -1,21 +1,23 @@
 # Arguments:
 # Y:            n by 1 vector of the response variable.
 # X:            n (number of rows) by p (number of columns) data matrix.
-# R0:           p by p symmetric matrix of mass matrix.
-# R1:           p by p symmetric matrix of stiff matrix.
-# lambda:     tuning parameters of the penalty.
+# R0:            p by p symmetric matrix of the penalty weighted laplacian matrix.
+# R1:     tuning parameters of the penalty weighted laplacian matrix.
+# lambda.1:     tuning parameters of the smoothness penalty
 # ----------------------------------------------------------------------------
 # Outputs:
 # intercept:    intercept of the linear regression model.
 # beta:         regression coefficients (slopes) of the linear regression model.
 # ---------------------------------------------------------------------------
 
-# lpl_penalty(Y=y,X=fdata,L=lpl,lambda.L=100,lambda.1=0.0001)
+
 library(Matrix) 
+library(glmnet)
 
-lpl_penalty <- function(Y, X, R0,R1, lambda){
-
-
+spareg <- function(Y, X, R0,R1, lambda){
+  
+  start.time <- Sys.time()
+  
   ori.Y <- Y
   ori.X <- X
   
@@ -26,27 +28,32 @@ lpl_penalty <- function(Y, X, R0,R1, lambda){
   Y <- Y - mean(Y)
   n <- nrow(X)
   p <- ncol(X)
-  scale.fac <- attr(scale(X), "scaled:scale")
+  scale.mean <- attr(scale(X), "scaled:scale")
+  scale.fac <- ifelse(scale.fac==0,1,scale.fac)
   X <- scale(X)
   X[is.na(X)] <- 0
-  
+
   # ----------------------
   # | create linear equation|
   # ----------------------
-  # here we replace R1^-1 with a sparse diagonal matrix
-  R1_inv=.sparseDiagona(1/rowsum(R1))
-  L=R0*R1_inv*R0
+  # here we replace R0^-1 with a sparse diagonal matrix
+  R0_inv=Diagonal(x=1/Matrix::rowSums(R0))
+  L=R1%*%R0_inv%*%R1
   
   S<-chol(L)
+  end.time <- Sys.time()
+  print(end.time-start.time)
   Xstar <- rbind(X, sqrt(lambda)*t(S)) 
   Ystar <- c(Y, rep(0, p))
-  
+ 
   # ----------------------
   # | use glmnet to solve the euqation|
   # ----------------------
   
   betahat <- glmnet(Xstar, Ystar, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
+  end.time <- Sys.time()
+  print(end.time-start.time)
   beta <- betahat / scale.fac
-  intercept <- mean(ori.Y - ori.X %*% truebetahat)
-  return(list(intercept =   intercept, beta = beta))
+  intercept <- mean(ori.Y - ori.X %*% beta)
+  return(list(intercept =intercept, beta = beta))
 }
