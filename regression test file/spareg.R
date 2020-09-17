@@ -28,9 +28,9 @@ spareg <- function(Y, X, R0,R1, lambda){
   Y <- Y - mean(Y)
   n <- nrow(X)
   p <- ncol(X)
-  scale.mean <- attr(scale(X), "scaled:scale")
-  scale.fac <- ifelse(scale.fac==0,1,scale.fac)
   X <- scale(X)
+  scale.fac <- attr(scale(X), "scaled:scale")
+  scale.fac <- ifelse(scale.fac==0,1,scale.fac)
   X[is.na(X)] <- 0
 
   # ----------------------
