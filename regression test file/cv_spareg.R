@@ -19,7 +19,7 @@ cv_spareg <- function(Y, X, R0,R1, kfolds, lambdas){
   nlambda=length(lambdas)
   
   cv_mse=seq(0,nlambda)
-  fold=cut(seq(1,nrow(X)),breaks=kolds,labels=FALSE)
+  fold=cut(seq(1,nrow(X)),breaks=kfolds,labels=FALSE)
   
   for(i in 1:nlambda){
     error=0
