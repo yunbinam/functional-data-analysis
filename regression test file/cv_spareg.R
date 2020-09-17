@@ -19,19 +19,19 @@ cv_spareg <- function(Y, X, R0,R1, kfolds, lambdas){
   nlambda=length(lambdas)
   
   cv_mse=seq(0,nlambda)
-  fold=cut(seq(1,nrow(X)),breaks=kolds,labels=FALSE)
+  fold=cut(seq(1,nrow(X)),breaks=kfolds,labels=FALSE)
   
   for(i in 1:nlambda){
     error=0
     for(k in 1:kfolds){
-      x_train=x[!fold==i,]
-      y_train=y[!fold==i,]
-      x_valid=x[fold==i,]
-      y_valid=y[fold==i,]
-      coef=spareg(y_train, x_train, R0,R1, lambdas[i])
+      X_train=X[!fold==i,]
+      y_train=y[!fold==i]
+      X_valid=X[fold==i,]
+      y_valid=y[fold==i]
+      coef=spareg(y_train, X_train, R0,R1, lambdas[i])
       intercept=coef$intercept
       beta=coef$beta
-      predict=intercept+x_valid%*%beta
+      predict=intercept+X_valid%*%beta
       error=error+mean((predict-y_valid)^2)
     }
     cv_mse[i]=error/k
