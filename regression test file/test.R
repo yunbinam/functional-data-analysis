@@ -1,5 +1,6 @@
 library(Matrix)
-
+source('spareg.R')
+source('CV_spareg.R')
 
 # reading the data 
 data=readRDS('A.rds')
@@ -20,24 +21,23 @@ coef=spareg(y_train,X_train,R0,R1,0.01)
 end.time <- Sys.time()
 print(end.time-start.time)
 
-#--------------------------------------
-# performance
 predict=X_test%*%coef$beta+coef$intercept
 mean((y_test-predict)^2)
 
 
 ## -------------------------------
-# compare with logistic regression with glmnet
-model1=glmnet(X_train, y_train, lambda = 0, alpha=0,intercept = TRUE, standardize = TRUE, thresh = 1e-7)
+# compare with linear regression using glmnet
+model1=glmnet(X_train, y_train, lambda = 0, alpha=0,intercept = TRUE, standardize = FALSE, thresh = 1e-7)
 predict=X_test%*%model1$beta+model1$a0
 mean((y_test-predict)^2)
 
 
 
-
 ##-----------
 # cross-validation
-reg=cv_spareg(Y, X, R0,R1, 2, c(0.01,0.02))
+reg=cv_spareg(y, X, R0,R1, 5,seq(0,1,0.1))
+
+reg=cv_spareg(y_train, X_train, R0,R1, 2,c(0.1,0.2))
 
 
 
