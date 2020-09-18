@@ -14,37 +14,35 @@
 
 library(Matrix) 
 
-cv_spareg <- function(Y, X, R0,R1, kfolds, lambdas){
+cv_spareg <- function(y, X, R0,R1, kfolds, lambdas){
   
   nlambda=length(lambdas)
   
-  cv_mse=seq(0,nlambda)
+  cv_mse=rep(0,nlambda)
   fold=cut(seq(1,nrow(X)),breaks=kfolds,labels=FALSE)
   
   for(i in 1:nlambda){
     error=0
-    for(k in 1:kfolds){
-      X_train=X[!fold==i,]
-      y_train=y[!fold==i]
-      X_valid=X[fold==i,]
-      y_valid=y[fold==i]
+    for(j in 1:kfolds){
+      X_train=X[!fold==j,]
+      y_train=y[!fold==j]
+      X_valid=X[fold==j,]
+      y_valid=y[fold==j]
       coef=spareg(y_train, X_train, R0,R1, lambdas[i])
       intercept=coef$intercept
       beta=coef$beta
       predict=intercept+X_valid%*%beta
       error=error+mean((predict-y_valid)^2)
     }
-    cv_mse[i]=error/k
+    cv_mse[i]=error/kfolds
   }
   
-  
-  min_lambda=lambdas[which(CV_err==min(CV_err))]
-  
-  coef=spareg(Y, X, R0,R1, min_lambda)
+
+  min_lambda=lambdas[which(cv_mse==min(cv_mse))]
+  coef=spareg(y, X, R0,R1, min_lambda)
   intercept=coef$intercept
   beta=coef$beta
-  predict=intercept+X%*%beta
-  mse=mse+mean((predict-Y)^2)
+
   
-  return(list(coef=coef,min_lambda=min_lambda,MSE=mse))
+  return(list(coef=coef,min_lambda=min_lambda,cv_mse=cv_mse))
 }
