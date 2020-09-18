@@ -28,17 +28,15 @@ spareg <- function(Y, X, R0,R1, lambda){
   Y <- Y - mean(Y)
   n <- nrow(X)
   p <- ncol(X)
-  X <- scale(X)
-  scale.fac <- attr(scale(X), "scaled:scale")
-  scale.fac <- ifelse(scale.fac==0,1,scale.fac)
-  X[is.na(X)] <- 0
+  X <- scale(X,center=TRUE,scale=FALSE)
+
 
   # ----------------------
-  # | create linear equation|
+  # | linear equation|
   # ----------------------
   # here we replace R0^-1 with a sparse diagonal matrix
-  R0_inv=Diagonal(x=1/Matrix::rowSums(R0))
-  L=R1%*%R0_inv%*%R1
+  R0_inv<-Diagonal(x=1/Matrix::rowSums(R0))
+  L<-R1%*%R0_inv%*%R1
   
   S<-chol(L)
   end.time <- Sys.time()
@@ -50,10 +48,9 @@ spareg <- function(Y, X, R0,R1, lambda){
   # | use glmnet to solve the euqation|
   # ----------------------
   
-  betahat <- glmnet(Xstar, Ystar, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
+  beta <- glmnet(Xstar, Ystar, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
   end.time <- Sys.time()
   print(end.time-start.time)
-  beta <- betahat / scale.fac
   intercept <- mean(ori.Y - ori.X %*% beta)
   return(list(intercept =intercept, beta = beta))
 }
