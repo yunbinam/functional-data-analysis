@@ -1,6 +1,11 @@
 library(Matrix)
+library(glmnet)
+#path='\\\\fs2-vip/students/wenboz4/Desktop/high dimension project/DataAD/control group data/spareg'
+#setwd(path)
 source('spareg.R')
 source('CV_spareg.R')
+source('cv_smooth_x.R')
+source('smooth_x_reg.R')
 
 # reading the data 
 data=readRDS('A.rds')
@@ -15,32 +20,24 @@ X_test=X[70:87,]
 y_train=y[1:70]
 y_test=y[70:87]
 
-# modeling
-start.time <- Sys.time()
+#-----------------------------------------
+#smoothing coefficients
 coef=spareg(y_train,X_train,R0,R1,0.01)
-end.time <- Sys.time()
-print(end.time-start.time)
-
 predict=X_test%*%coef$beta+coef$intercept
 mean((y_test-predict)^2)
 
 
-## -------------------------------
-# compare with linear regression using glmnet
-model1=glmnet(X_train, y_train, lambda = 0, alpha=0,intercept = TRUE, standardize = FALSE, thresh = 1e-7)
-predict=X_test%*%model1$beta+model1$a0
+# cross-validation
+reg=cv_spareg(y_train, X_train, R0,R1, 5,10^(seq(-3,3,1)))
+coef=spareg(y_train,X_train,R0,R1,reg$min_lambda)
+predict=X_test%*%coef$beta+coef$intercept
 mean((y_test-predict)^2)
 
 
 
-##-----------
-# cross-validation
-reg=cv_spareg(y, X, R0,R1, 5,seq(0,1,0.1))
+##-----------------------------
+# smoothing covariates
+coef=smooth_x_reg(y[1:5],X[1:5,],R0,R1,1)
 
-reg=cv_spareg(y_train, X_train, R0,R1, 2,c(0.1,0.2))
-
-
-
-
-
-
+#cv
+model=cv_smooth_x(y, X, R0,R1, 5, c(0,0.1))
