@@ -10,12 +10,12 @@ source('cv_smooth_x.R')
 source('smooth_x_reg.R')
 
 # reading the data 
-data=readMat('Simulation/A_samples.mat')
-R0=readMM('R0.mtx')
-R1=readMM('R1.mtx')
+data=readMat('Simulation/A_samples_642.mat')
+R0=readMM('R0_642.mtx')
+R1=readMM('R1_642.mtx')
 
 y=data$A[,1]
-X=data$A[,2:32493]
+X=data$A[,2:ncol(data$A)]
 
 n=length(y)
 train=sample(1:length(y), 0.8 * length(y))
