@@ -28,16 +28,16 @@ y_test=y[test]
 
 #-----------------------------------------
 #smoothing coefficients
-coef=spareg(y_train,X_train,R0,R1,0.01)
-predict=X_test%*%coef$beta+coef$intercept
-mse1=mean((y_test-predict)^2)
+coef1=spareg(y_train,X_train,R0,R1,0.01)
+predict1=X_test%*%coef1$beta+coef1$intercept
+mse1=mean((y_test-predict1)^2)
 
 
 # cross-validation
-reg=cv_spareg(y_train, X_train, R0,R1, 5,10^(seq(-3,3,1)))
-coef=spareg(y_train,X_train,R0,R1,reg$min_lambda)
-predict=X_test%*%coef$beta+coef$intercept
-mse2=mean((y_test-predict)^2)
+reg=cv_spareg(y_train,X_train,R0,R1,5,10^(seq(-3,3,1)))
+coef2=spareg(y_train,X_train,R0,R1,reg$min_lambda)
+predict2=X_test%*%coef2$beta+coef2$intercept
+mse2=mean((y_test-predict2)^2)
 
 
 
