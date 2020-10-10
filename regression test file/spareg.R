@@ -16,7 +16,6 @@ library(glmnet)
 
 spareg <- function(Y, X, R0,R1, lambda){
   
-  start.time <- Sys.time()
   
   ori.Y <- Y
   ori.X <- X
@@ -39,18 +38,15 @@ spareg <- function(Y, X, R0,R1, lambda){
   L<-R1%*%R0_inv%*%R1
   
   S<-chol(L)
-  end.time <- Sys.time()
-  print(end.time-start.time)
+
   Xstar <- rbind(X, sqrt(lambda)*t(S)) 
   Ystar <- c(Y, rep(0, p))
  
   # ----------------------
-  # | use glmnet to solve the euqation|
+  # | use glmnet to solve the equation|
   # ----------------------
   
   beta <- glmnet(Xstar, Ystar, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
-  end.time <- Sys.time()
-  print(end.time-start.time)
   intercept <- mean(ori.Y - ori.X %*% beta)
   return(list(intercept =intercept, beta = beta))
 }
