@@ -36,3 +36,4 @@ mysamples <- function(eigV, m, n, v, noise_x, noise_y){
         
         return(list(A=A, y=y, X=X))
 }
+
