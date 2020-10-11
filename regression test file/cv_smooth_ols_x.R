@@ -9,10 +9,13 @@
 # Outputs:
 # coef:         coeffcients of regression model, including intercept and beta.
 # min_lambda:   the lambda which causes minimum cross validation MSE
-# MSE:          the MSE of the best lambda on the whole dataset
+# cv_mse:          the MSE of the best lambda on the whole dataset
 # ---------------------------------------------------------------------------
 
-cv_smooth_x<- function(Y, X, R0,R1, kfolds, lambdas){
+##lambda is chosen by minimizing least squares of the regression (CV needed)
+cv_smooth_ols_x<- function(Y, X, R0,R1, kfolds, lambdas){
+  n<-nrow(X)
+  p <- ncol(X)
   nlambda=length(lambdas)
   
   cv_mse=rep(0,nlambda)
@@ -23,22 +26,18 @@ cv_smooth_x<- function(Y, X, R0,R1, kfolds, lambdas){
   L<-R1%*%R0_inv%*%R1
   S<-chol(L)
   identity<-Diagonal(x=rep(1,p))
-  n<-nrow(X)
-  p <- ncol(X)
+  
   
   for(i in 1:nlambda){
     error<-0
     lambda=lambdas[i]
     new_X<-matrix(0,nrow=n,ncol=p)
     Xstar <- rbind(identity, sqrt(lambda)*t(S))
-    start.time <- Sys.time()
     for(k in 1:nrow(X)){
-      print(k)
       x_obs <- c(X[k,], rep(0, p))
       new_X[k,]<- as.vector(glmnet(Xstar, x_obs, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta)
     }
-    end.time <- Sys.time()
-    print(end.time-start.time)
+    
     
     for(j in 1:kfolds){
       
@@ -57,15 +56,33 @@ cv_smooth_x<- function(Y, X, R0,R1, kfolds, lambdas){
       
       beta=glmnet(center_X_train, center_y_train, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
       intercept <- mean(ori.y_train - ori.X_train %*% beta)
-      predict=intercept+X_valid%*%beta
+      predict=intercept+X_valid%*%R0%*%beta
       error=error+mean((predict-y_valid)^2)
     }
     cv_mse[i]=error/kfolds
   }
   
   min_lambda=lambdas[which(cv_mse==min(cv_mse))]
-  coef=smooth_x_reg(Y, X, R0,R1, min_lambda)
-  intercept=coef$intercept
-  beta=coef$beta
+  
+  ## using selected lambda to build model based on all data----
+  
+  Xstar <- rbind(identity, sqrt(min_lambda)*t(S))
+  for(k in 1:n){
+    x_obs <- c(X[k,], rep(0, p))
+    new_X[k,]<- as.vector(glmnet(Xstar, x_obs, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta)
+  }
+  
+  X=new_X%*%R0
+  ori.y=Y
+  ori.X=X
+  center_X <- scale(X,center=TRUE,scale=FALSE)
+  center_y <- Y - mean(y)
+  
+  beta=glmnet(center_X, center_y, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta
+  intercept <- mean(ori.y - ori.X %*% beta)
+  coef=list(intercept=intercept,beta=beta)
+  #coef=smooth_ols(Y, X, R0,R1, min_lambda)
+  #intercept=coef$intercept
+  #beta=coef$beta
   return(list(coef=coef,min_lambda=min_lambda,cv_mse=cv_mse))
 }

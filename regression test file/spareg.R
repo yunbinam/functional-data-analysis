@@ -11,9 +11,6 @@
 # ---------------------------------------------------------------------------
 
 
-library(Matrix) 
-library(glmnet)
-
 spareg <- function(Y, X, R0,R1, lambda){
   
   
@@ -28,8 +25,8 @@ spareg <- function(Y, X, R0,R1, lambda){
   n <- nrow(X)
   p <- ncol(X)
   X <- scale(X,center=TRUE,scale=FALSE)
-
-
+  
+  
   # ----------------------
   # | linear equation|
   # ----------------------
@@ -38,10 +35,10 @@ spareg <- function(Y, X, R0,R1, lambda){
   L<-R1%*%R0_inv%*%R1
   
   S<-chol(L)
-
+  
   Xstar <- rbind(X, sqrt(lambda)*t(S)) 
   Ystar <- c(Y, rep(0, p))
- 
+  
   # ----------------------
   # | use glmnet to solve the equation|
   # ----------------------
