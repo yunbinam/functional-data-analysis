@@ -12,7 +12,6 @@
 # MSE:          the MSE of the best lambda on the whole dataset
 # ---------------------------------------------------------------------------
 
-library(Matrix) 
 
 cv_spareg <- function(y, X, R0,R1, kfolds, lambdas){
   
@@ -37,12 +36,12 @@ cv_spareg <- function(y, X, R0,R1, kfolds, lambdas){
     cv_mse[i]=error/kfolds
   }
   
-
+  
   min_lambda=lambdas[which(cv_mse==min(cv_mse))]
   coef=spareg(y, X, R0,R1, min_lambda)
   intercept=coef$intercept
   beta=coef$beta
-
+  
   
   return(list(coef=coef,min_lambda=min_lambda,cv_mse=cv_mse))
 }
