@@ -7,53 +7,6 @@
 # seq.l:        sequence of tuning parameter lambda
 # random.folds: logical
 
-simulation <- function(sample, R0, R1,
-                       p = 0.5, K = 5, seq.l = 10^(seq(-5,5,1)),
-                       random.folds = FALSE){
-        y <- sample$y
-        X <- sample$X
-        
-        n <- length(y)
-        
-        train <- sample(1:n, p * n)
-        test <- -train
-        
-        X_train <- X[train,]
-        X_test <- X[test,]
-        y_train <- y[train]
-        y_test <- y[test]
-        
-        n_train <- length(y_train)
-        
-        folds <- cut(1:n_train, breaks=K, labels=FALSE)
-        if(random.folds){
-                folds <- sample(folds)
-        }
-        mse <- matrix(0, ncol=length(seq.l), nrow=K)
-        for(i in 1:K){
-                X.train <- X_train[folds!=i,]
-                y.train <- y_train[folds!=i]
-                X.test <- X_train[folds==i,]
-                y.test <- y_train[folds==i]
-                mse[i,] <- sapply(seq.l,
-                                  FUN = function(l.val){
-                                          fit.y <- spareg(y.train, X.train, R0, R1, l.val)
-                                          predict <- fit.y$intercept + X.test%*%fit.y$beta
-                                          mean((predict-y.test)^2)
-                                  }
-                                  )
-        }
-        mean.cv.mse <- colMeans(mse)
-        l.opt <- seq.l[which.min(mean.cv.mse)]
-        
-        fit.y <- spareg(y_train, X_train, R0, R1, l.opt)
-        predict <- X_test%*%fit.y$beta+fit.y$intercept
-        
-        mse <- mean((y_test-predict)^2)
-        return(mse)
-}
-
-
 oneSim <- function(sample, R0, R1,
                    p = 0.5, K = 5, seq.l = 10^(seq(-5,5,1))){
         y <- sample$y

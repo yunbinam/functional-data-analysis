@@ -6,8 +6,10 @@ library(ggplot2)
 #path='/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain/regression test file'
 #setwd(path)
 source('spareg.R')
+source('smooth_x.R')
+source('smooth_recon_x.R')
 source('CV_spareg.R')
-source('cv_smooth_x.R')
+source('cv_smooth_ols_x.R')
 source('smooth_x_reg.R')
 source('Simulation/sample generator.R')
 
@@ -21,15 +23,8 @@ sample <- mysamples(eigV, 15, 500, 4, 1, 9)
 #-----------------------------------------
 #smoothing coefficients
 
-
-mse1 <- replicate(100, simulation(sample, R0, R1, random.folds=TRUE))
-mse2 <- replicate(100, simulation(sample, R0, R1, random.folds=FALSE))
-mse3 <- replicate(100, oneSim(sample, R0, R1))
-rst <- data.frame("f"=c(rep("f1", length(mse1)), rep("f2", length(mse2)), rep("f3", length(mse3))),
-                  "MSE"=c(mse1, mse2, mse3))
-
-ggplot(rst, aes(x=f, y=MSE)) +
-        geom_boxplot()
+mse <- replicate(100, oneSim(sample, R0, R1))
+boxplot(mse)
 
 
 # compare beta* and beta
