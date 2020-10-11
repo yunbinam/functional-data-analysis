@@ -1,4 +1,4 @@
-function [X, beta] = mysamples(R1, n, m, v, noise) 
+function [X, beta, V] = mysamples(R1, n, m, v, noise) 
 %
 % Function: mysamples(R1,n,m)
 % simulation sample generator
