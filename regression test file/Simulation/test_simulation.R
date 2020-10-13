@@ -7,12 +7,11 @@ library(dplyr)
 #path='/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain/regression test file'
 #setwd(path)
 source('spareg.R')
-source('smooth_x.R')
+source('cv_spareg.R')
 source('smooth_recon_x.R')
-source('CV_spareg.R')
 source('cv_smooth_ols_x.R')
-source('smooth_x_reg.R')
 source('Simulation/sample generator.R')
+source('Simulation/simulation result.R')
 
 # generate simulation samples
 eigV <- readMat('Simulation/eigV.mat')$eigV

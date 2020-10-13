@@ -25,11 +25,11 @@ oneSim <- function(sample, R0, R1, method = "cv_spareg",
         
         if(method=="cv_spareg"){
                 spareg.fit <- cv_spareg(y_train,X_train,R0,R1,K,seq.l)
-                coef <- spareg$coef
+                coef <- spareg.fit$coef
         }
         
         if(method=="smooth_recon_x"){
-                recon.fit <- smooth_recon_X(y_train,X_train,R0,R1,seq.l)
+                recon.fit <- smooth_recon_x(y_train,X_train,R0,R1,seq.l)
                 coef <- recon.fit$coef
         }
         
