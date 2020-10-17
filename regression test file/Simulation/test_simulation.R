@@ -24,13 +24,13 @@ sample_smooth <- mysamples(eigV, 10, 500, 4, 0, 1)
 #-----------------------------------------
 #smoothing coefficients
 
-mse1 <- replicate(100, oneSim(sample_noise, R0, R1, method="cv_spareg"))
-mse2 <- replicate(100, oneSim(sample_noise, R0, R1, method="smooth_recon_x"))
-mse3 <- replicate(100, oneSim(sample_noise, R0, R1, method="cv_smooth_ols_x"))
+mse1 <- replicate(50, oneSim(sample_noise, R0, R1, method="cv_spareg"))
+mse2 <- replicate(50, oneSim(sample_noise, R0, R1, method="smooth_recon_x"))
+mse3 <- replicate(50, oneSim(sample_noise, R0, R1, method="cv_smooth_ols_x"))
 
-mse1_s <- replicate(100, oneSim(sample_smooth, R0, R1, method="cv_spareg"))
-mse2_s <- replicate(100, oneSim(sample_smooth, R0, R1, method="smooth_recon_x"))
-mse3_s <- replicate(100, oneSim(sample_smooth, R0, R1, method="cv_smooth_ols_x"))
+mse1_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="cv_spareg"))
+mse2_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="smooth_recon_x"))
+mse3_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="cv_smooth_ols_x"))
 
 rst <- data.frame("method"=c(rep("Smoothing beta", length(mse1)), 
                              rep("Smoothing x with recon", length(mse2)), 
@@ -40,14 +40,27 @@ rst <- data.frame("method"=c(rep("Smoothing beta", length(mse1)),
                   "MSE"=c(mse1, mse2, mse3, mse1_s, mse2_s, mse3_s))
 
 rst %>% group_by(sample) %>%
-        ggplot(rst, aes(x=method, y=MSE, fill=method)) +
+        ggplot(aes(x=method, y=MSE, colour=sample)) +
         geom_boxplot()
 
+rst %>% filter(sample=="Noisy") %>%
+        ggplot(aes(x=method,y=MSE)) +
+        geom_boxplot()
+
+rst %>% filter(method=="Smoothing beta") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
+
+rst %>% filter(method=="Smoothing x with recon") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
+
+rst %>% filter(method=="Smoothing x with cv") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
 
 # compare beta* and beta
 # integral t(beta*-beta)%*%R0%*%(beta*-beta) where beta: column vector
 # box plot
 # how much different box plots depending on the noise (on x and y) we put
 # generalized eigenvalues 
-
-

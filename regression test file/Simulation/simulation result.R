@@ -39,7 +39,7 @@ oneSim <- function(sample, R0, R1, method = "cv_spareg",
         }
         
         predict <- X_test%*%coef$beta+coef$intercept
-        mse <- mean((y_test-predict)^2)
+        mse <- mean((y_test-predict)^2, na.rm = TRUE)
         
         return(mse)
 }
