@@ -9,19 +9,19 @@
 # 
 
 ## simple example
-Y <- matrix(c(0,1,0,
-              1,0,0,
-              1,0,0,
-              0,0,1,
-              0,0,1,
-              1,0,0,
-              0,1,0), ncol=3, byrow=TRUE)
-
-X <- matrix(runif(7*642), ncol=642)
-
-R0 <- readMM('../R0_642.mtx')
-R1 <- readMM('../R1_642.mtx')
-lambda <- 1
+# Y <- matrix(c(0,1,0,
+#               1,0,0,
+#               1,0,0,
+#               0,0,1,
+#               0,0,1,
+#               1,0,0,
+#               0,1,0), ncol=3, byrow=TRUE)
+# 
+# X <- matrix(runif(7*642), ncol=642)
+# 
+# R0 <- readMM('../R0_642.mtx')
+# R1 <- readMM('../R1_642.mtx')
+# lambda <- 1
 
 opt.score <- function(Y, X, R0, R1, lambda){
         
