@@ -1,49 +1,66 @@
 library(Matrix)
 library(glmnet)
 library(R.matlab)
+library(ggplot2)
+library(dplyr)
 #path='\\\\fs2-vip/students/wenboz4/Desktop/high dimension project/DataAD/control group data/spareg'
 #path='/Users/yunbi/Library/Mobile Documents/com~apple~CloudDocs/20_6_summer/Eardi/brain/regression test file'
 #setwd(path)
 source('spareg.R')
-source('CV_spareg.R')
-source('cv_smooth_x.R')
-source('smooth_x_reg.R')
+source('cv_spareg.R')
+source('smooth_recon_x.R')
+source('cv_smooth_ols_x.R')
+source('Simulation/sample generator.R')
+source('Simulation/simulation result.R')
 
-# reading the data 
-data=readMat('Simulation/A_samples_642.mat')
-R0=readMM('R0_642.mtx')
-R1=readMM('R1_642.mtx')
+# generate simulation samples
+eigV <- readMat('Simulation/eigV.mat')$eigV
+R0 <- readMM('R0_642.mtx')
+R1 <- readMM('R1_642.mtx')
 
-y=data$A[,1]
-X=data$A[,2:ncol(data$A)]
-
-n=length(y)
-train=sample(1:length(y), 0.8 * length(y))
-test=-train
-
-X_train=X[train,]
-X_test=X[test,]
-y_train=y[train]
-y_test=y[test]
+sample_noise <- mysamples(eigV, 10, 500, 4, 4, 1)
+sample_smooth <- mysamples(eigV, 10, 500, 4, 0, 1)
 
 #-----------------------------------------
 #smoothing coefficients
-coef1=spareg(y_train,X_train,R0,R1,0.01)
-predict1=X_test%*%coef1$beta+coef1$intercept
-mse1=mean((y_test-predict1)^2)
 
+mse1 <- replicate(50, oneSim(sample_noise, R0, R1, method="cv_spareg"))
+mse2 <- replicate(50, oneSim(sample_noise, R0, R1, method="smooth_recon_x"))
+mse3 <- replicate(50, oneSim(sample_noise, R0, R1, method="cv_smooth_ols_x"))
 
-# cross-validation
-reg=cv_spareg(y_train,X_train,R0,R1,5,10^(seq(-3,3,1)))
-coef2=spareg(y_train,X_train,R0,R1,reg$min_lambda)
-predict2=X_test%*%coef2$beta+coef2$intercept
-mse2=mean((y_test-predict2)^2)
+mse1_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="cv_spareg"))
+mse2_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="smooth_recon_x"))
+mse3_s <- replicate(50, oneSim(sample_smooth, R0, R1, method="cv_smooth_ols_x"))
 
+rst <- data.frame("method"=c(rep("Smoothing beta", length(mse1)), 
+                             rep("Smoothing x with recon", length(mse2)), 
+                             rep("Smoothing x with cv", length(mse3))),
+                  "sample"=c(rep("Noisy", length(mse1)+length(mse2)+length(mse3)),
+                             rep("Smooth", length(mse1_s)+length(mse2_s)+length(mse3_s))),
+                  "MSE"=c(mse1, mse2, mse3, mse1_s, mse2_s, mse3_s))
 
+rst %>% group_by(sample) %>%
+        ggplot(aes(x=method, y=MSE, colour=sample)) +
+        geom_boxplot()
 
-##-----------------------------
-# smoothing covariates
-# coef=smooth_x_reg(y[1:5],X[1:5,],R0,R1,1)
+rst %>% filter(sample=="Noisy") %>%
+        ggplot(aes(x=method,y=MSE)) +
+        geom_boxplot()
 
-#cv
-# model=cv_smooth_x(y, X, R0,R1, 5, c(0,0.1))
+rst %>% filter(method=="Smoothing beta") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
+
+rst %>% filter(method=="Smoothing x with recon") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
+
+rst %>% filter(method=="Smoothing x with cv") %>%
+        ggplot(aes(x=sample,y=MSE)) +
+        geom_boxplot()
+
+# compare beta* and beta
+# integral t(beta*-beta)%*%R0%*%(beta*-beta) where beta: column vector
+# box plot
+# how much different box plots depending on the noise (on x and y) we put
+# generalized eigenvalues 
