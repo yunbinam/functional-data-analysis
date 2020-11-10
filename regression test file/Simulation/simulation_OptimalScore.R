@@ -8,8 +8,8 @@ simu_case1<-function(n=100,v1,v2,v3){
   # train:valid:test=3:3:4
   
   Sigma<-diag(642)
-  n1=3*(n/10)
-  n2=2*n1
+  n1<-3*(n/10)
+  n2<-2*n1
     
   class1<-mvrnorm(n = n, v1, Sigma)
   class2<-mvrnorm(n = n, v2, Sigma)
@@ -23,4 +23,4 @@ simu_case1<-function(n=100,v1,v2,v3){
   return(data)
 }
 
-data<simu_case1(n=100,v1,v2,v3)
+data<-simu_case1(n=100,v1,v2,v3)
