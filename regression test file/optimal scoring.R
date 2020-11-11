@@ -1,5 +1,6 @@
 # Arguments:
-m# X:          n by s design matrix (covariates)
+# Y:          n by K indicator matrix of classes (response)
+# X:          n by s design matrix (covariates)
 # R0:         s by s symmetric mass matrix
 # R1:         s by s symmetric stiffness matrix
 # lambda:     tuning parameter of smoothness penalty
@@ -42,7 +43,7 @@ opt.score <- function(Y, X, R0, R1, lambda){
         
         ## 3. pre-specify theta1
         Q <- as.matrix(rep(1, ncol(Y)))
-        predicted.scores <- matrix(rep(0, n*(K-1)), ncol=K-1)
+        scoredX <- matrix(rep(0, n*(K-1)), ncol=K-1)
         
         ## 4. loop
         for(i in 1:(K-1)){
@@ -60,8 +61,8 @@ opt.score <- function(Y, X, R0, R1, lambda){
                 beta <- glmnet::glmnet(X.star, Y.star, 
                                        lambda=0, alpha=0, intercept=FALSE, 
                                        standardize=FALSE, thresh=1e-7)$beta
-                ## predicted scores
-                predicted.scores[,i] <- as.vector(centered.X %*% beta)
+                ## scored X
+                scoredX[,i] <- as.vector(centered.X %*% beta)
                 
                 ## c. add new theta
                 new.theta <- (diag(K) - as.matrix(Q[,i])%*%t(as.matrix(Q[,i]))%*%D) %*% solve(D)%*%t(Y)%*%X%*%beta
@@ -73,12 +74,12 @@ opt.score <- function(Y, X, R0, R1, lambda){
         }
         
         ## LDA with the first (one) discriminant direction
-        mu_k <- matrix(0, nrow = s, ncol = K) # centroid vectors
+        mu_k <- matrix(0, nrow = K-1, ncol = K) # centroid vectors
         pi_k <- vector(length = K)
-        sigma <- matrix(0, nrow = s, ncol = s) # covariance matrix
+        sigma <- matrix(0, nrow = K-1, ncol = K-1) # covariance matrix
         
         for (i in 1:K){
-                tmp <- X[Y[,i]==1,]
+                tmp <- scoredX[Y[,i]==1,]
                 pi_k[i] <- nrow(tmp)/n
                 mu_k[,i] <- colMeans(tmp)
                 for(j in 1:nrow(tmp)){
@@ -87,9 +88,15 @@ opt.score <- function(Y, X, R0, R1, lambda){
         }
         
         sigma <- sigma*(1/(n-K))
-        inv.sigma <- solve(sigma) # error.. not invertible
+        inv.sigma <- solve(sigma) 
         
-        ## How do we use score functions?
+        deltatrain <- matrix(0, ncol = K, nrow = n)
+        for (i in 1:K){
+                deltatrain[,i] <- scoredX %*% inv.sigma %*% mu_k[,i]
+                deltatrain[,i] <- deltatrain[,i] - 0.5*t(mu_k[,i]) %*% inv.sigma %*% mu_k[,i] + log(pi_k[i])
         
+        }
+        yhattrain <- apply(deltatrain, 1, which.max)
+
 }
 
