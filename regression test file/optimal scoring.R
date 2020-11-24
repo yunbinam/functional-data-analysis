@@ -8,21 +8,6 @@
 # Outputs:
 # beta:       s by K-1 matrix beta
 
-## simple example
-eigV <- R.matlab::readMat('Simulation/eigV.mat')$eigV
-v <- eigV[,sample(1:100,3)]
-X <- simu_case1(n=100, v1=v[,1], v2=v[,2], v3=v[,3])
-Y <- list(train=rbind(matrix(rep(c(1,0,0),30), ncol=3, byrow=TRUE),
-                      matrix(rep(c(0,1,0),30), ncol=3, byrow=TRUE),
-                      matrix(rep(c(0,0,1),30), ncol=3, byrow=TRUE)),
-          test=rbind(matrix(rep(c(1,0,0),40), ncol=3, byrow=TRUE),
-                      matrix(rep(c(0,1,0),40), ncol=3, byrow=TRUE),
-                      matrix(rep(c(0,0,1),40), ncol=3, byrow=TRUE)))
-
-R0 <- Matrix::readMM('R0_642.mtx')
-R1 <- Matrix::readMM('R1_642.mtx')
-lambda <- 1
-
 opt.score <- function(Y, X, R0, R1, lambda){
         
         Y <- as.matrix(Y)
