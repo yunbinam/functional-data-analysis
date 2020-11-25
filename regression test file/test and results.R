@@ -23,9 +23,9 @@ test_acc<-function(model,x_test,y_test){
 #----------------------------
 # example
 # given x_train,y_train, x_test, y_test where y is indicator matrices
-
-cv_model<-cv_opt.score(y_train, x_train, R0_642, R1_642, 5,10^seq(-5,5,1))
-model1<-opt.score(y_train, x_train, R0_642, R1_642, cv_model$min_lambda)
-result1<-test_acc(model1,x_test,y_test)
-result1$accuracy
-result1$yhat
+# 
+# cv_model<-cv_opt.score(y_train, x_train, R0_642, R1_642, 5,10^seq(-5,5,1))
+# model1<-opt.score(y_train, x_train, R0_642, R1_642, cv_model$min_lambda)
+# result1<-test_acc(model1,x_test,y_test)
+# result1$accuracy
+# result1$yhat
