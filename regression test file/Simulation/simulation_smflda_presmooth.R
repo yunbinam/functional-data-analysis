@@ -21,16 +21,33 @@ Y <- rbind(matrix(rep(c(1,0,0),100), ncol=3, byrow=TRUE),
            matrix(rep(c(0,0,1),100), ncol=3, byrow=TRUE))
 y <- c(rep(1,100), rep(2,100), rep(3,100))
 
-X.train <- X[c(1:66,101:166,201:266),]
-Y.train <- Y[c(1:66,101:166,201:266),]
+test.index <- c(sample(1:n1, n1/3),sample(1:n2, n2/3),sample(1:n3, n3/3))
 
-X.test <- X[-c(1:66,101:166,201:266),]
-Y.test <- Y[-c(1:66,101:166,201:266),]
+X.train <- X[-test.index,]
+Y.train <- Y[-test.index,]
+
+X.test <- X[test.index,]
+Y.test <- Y[test.index,]
 
 my.lambda.seq <- 10^seq(-5,5,1)
 
-fit.cv.opt <- cv_opt.score(Y.train, X.train, R0, R1, 5, my.lambda.seq)
-model.sm.flda <- opt.score(Y.train, X.train, R0, R1, fit.cv.opt$min_lambda)
-result.sm.flda <- test_acc(model.sm.flda, X.test, Y.test)
+result1 <- rep(0,100)
+
+for(i in 1:100){
+        fit.cv.opt <- cv_opt.score(Y.train, X.train, R0, R1, 5, my.lambda.seq)
+        model.sm.flda <- opt.score(Y.train, X.train, R0, R1, fit.cv.opt$min_lambda)
+        result.sm.flda <- test_acc(model.sm.flda, X.test, Y.test)
+        result1[i] <- result.sm.flda$accuracy
+}
+
+result2 <- rep(0, 100)
+
+for(i in 1:100){
+        result.presmooth <- pre.smooth(y, X, R0, R1, 1)
+        result2[i] <- result.presmooth$accuracy
+}
+
+plot(result2)
 
 result.presmooth <- pre.smooth(y, X, R0, R1, 1)
+result.presmooth$accuracy

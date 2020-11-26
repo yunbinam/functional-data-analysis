@@ -16,6 +16,12 @@ pre.smooth <- function(y, X, R0, R1, lambda){
         
         n <- nrow(X)
         p <- ncol(X)
+        
+        ## 3-class problem
+        n1 <- sum(y==1)
+        n2 <- sum(y==2)
+        n3 <- sum(y==3)
+        
         smooth.X <- matrix(0,nrow=n,ncol=p)
         identity <- Diagonal(x=rep(1,p))
         
@@ -28,11 +34,13 @@ pre.smooth <- function(y, X, R0, R1, lambda){
                 smooth.X[i,] <- as.vector(glmnet(Xstar, x_obs, lambda = 0, alpha=0,intercept = FALSE, standardize = FALSE, thresh = 1e-7)$beta)
         }
         
-        smooth.X.train <- smooth.X[c(1:66,101:166,201:266),]
-        y.train <- y[c(1:66,101:166,201:266)]
+        test.index <- c(sample(1:n1, n1/3),sample(1:n2, n2/3),sample(1:n3, n3/3))
         
-        smooth.X.test <- smooth.X[-c(1:66,101:166,201:266),]
-        y.test <- y[-c(1:66,101:166,201:266)]
+        smooth.X.train <- smooth.X[-test.index,]
+        y.train <- y[-test.index]
+        
+        smooth.X.test <- smooth.X[test.index,]
+        y.test <- y[test.index]
         
         df.train <- data.frame(cbind(smooth.X.train, y=y.train))
         df.test <- data.frame(cbind(smooth.X.test, y=y.test))
