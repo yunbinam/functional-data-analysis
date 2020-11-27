@@ -23,7 +23,7 @@ opt.score <- function(Y, X, R0, R1, lambda){
         R0til.inv <- Matrix::Diagonal(x=1/Matrix::rowSums(R0))
         L <- R1 %*% R0til.inv %*% R1
         S <- Matrix::chol(L)
-        centered.X <- X - mean(X)
+        centered.X <- scale(X,center=TRUE,scale=FALSE)
         X.star <- rbind(centered.X, sqrt(lambda)*t(as.matrix(S)))
         
         ## 3. pre-specify theta1
