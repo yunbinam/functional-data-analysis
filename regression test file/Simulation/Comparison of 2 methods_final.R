@@ -29,6 +29,7 @@ mysamples <- function(eigV, K=3, n=100){
                         X[(k-1)*n+i,] <- x
                 }
         }
+        
         y <- Reduce(rbind, sapply(1:K, function(x) rep(x,n)))
         data <- cbind(y=y, X)
         new_data <- data[sample(nrow(data)),]
@@ -98,84 +99,109 @@ pre.smooth <- function(ytrain, ytest, Xtrain, Xtest, R0, R1, lambdas){
         return(list(yhat = fitted.y, accuracy = accuracy))
 }
 
-samples <- mysamples(eigV,3,100)
-samples <- samples[order(samples$y),]
-
-test.index <- c(sample(1:n1, n1/3),sample(1:n2, n2/3),sample(1:n3, n3/3))
-
-X <- as.matrix(samples[,1:642])
-Y <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
-y <- as.numeric(samples[,"y"])
-
-X.train <- X[-test.index,]
-Y.train <- Y[-test.index,]
-y.train <- y[-test.index]
-
-X.test <- X[test.index,]
-Y.test <- Y[test.index,]
-y.test <- y[test.index]
-
 my.lambda.seq <- 10^seq(-5,5,1)
 
-result1 <- rep(0,100)
+result1.100 <- rep(0,100)
 
 for(i in 1:100){
         
         samples <- mysamples(eigV,3,100)
         samples <- samples[order(samples$y),]
         
-        test.index <- c(sample(1:n1, n1/3),sample(1:n2, n2/3),sample(1:n3, n3/3))
+        X.train <- as.matrix(samples[,1:642])
+        Y.train <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.train <- as.numeric(samples[,"y"])
         
-        X <- as.matrix(samples[,1:642])
-        Y <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
-        y <- as.numeric(samples[,"y"])
+        samples.test <- mysamples(eigV,3,100)
+        samples.test <- samples.test[order(samples.test$y),]
         
-        X.train <- X[-test.index,]
-        Y.train <- Y[-test.index,]
-        y.train <- y[-test.index]
-        
-        X.test <- X[test.index,]
-        Y.test <- Y[test.index,]
-        y.test <- y[test.index]
+        X.test <- as.matrix(samples.test[,1:642])
+        Y.test <- as.matrix(samples.test[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.test <- as.numeric(samples.test[,"y"])
         
         fit.cv.opt <- cv_opt.score(Y.train, X.train, R0, R1, 5, my.lambda.seq)
         model.sm.flda <- opt.score(Y.train, X.train, R0, R1, fit.cv.opt$min_lambda)
         result.sm.flda <- test_acc(model.sm.flda, X.test, Y.test)
-        result1[i] <- result.sm.flda$accuracy
+        result1.100[i] <- result.sm.flda$accuracy
 }
 
-boxplot(result1)
+boxplot(result1.100)
 
-result2 <- rep(0, 100)
+result2.100 <- rep(0, 100)
 
 for(i in 1:100){
         
         samples <- mysamples(eigV,3,100)
         samples <- samples[order(samples$y),]
         
-        test.index <- c(sample(1:n1, n1/3),sample(1:n2, n2/3),sample(1:n3, n3/3))
+        X.train <- as.matrix(samples[,1:642])
+        Y.train <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.train <- as.numeric(samples[,"y"])
         
-        X <- as.matrix(samples[,1:642])
-        Y <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
-        y <- as.numeric(samples[,"y"])
+        samples.test <- mysamples(eigV,3,100)
+        samples.test <- samples.test[order(samples.test$y),]
         
-        X.train <- X[-test.index,]
-        Y.train <- Y[-test.index,]
-        y.train <- y[-test.index]
-        
-        X.test <- X[test.index,]
-        Y.test <- Y[test.index,]
-        y.test <- y[test.index]
+        X.test <- as.matrix(samples.test[,1:642])
+        Y.test <- as.matrix(samples.test[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.test <- as.numeric(samples.test[,"y"])
         
         result.presmooth <- pre.smooth(y.train, y.test, X.train, X.test, R0, R1, my.lambda.seq)
-        result2[i] <- result.presmooth$accuracy
+        result2.100[i] <- result.presmooth$accuracy
 
 }
 
-# for(i in 1:100){
-#         fit.cv.presmooth <- cv_pre.smooth(y.train, X.train, R0, R1, 5, my.lambda.seq)
-#         result.presmooth <- pre.smooth(y.train, X.train, R0, R1, fit.cv.presmooth$min_lambda)
-#         result2[i] <- result.presmooth$accuracy
-# }
+boxplot(result2.100)
 
-boxplot(result2)
+
+result1.50 <- rep(0,50)
+
+for(i in 1:50){
+        
+        samples <- mysamples(eigV,3,50)
+        samples <- samples[order(samples$y),]
+        
+        X.train <- as.matrix(samples[,1:642])
+        Y.train <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.train <- as.numeric(samples[,"y"])
+        
+        samples.test <- mysamples(eigV,3,50)
+        samples.test <- samples.test[order(samples.test$y),]
+        
+        X.test <- as.matrix(samples.test[,1:642])
+        Y.test <- as.matrix(samples.test[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.test <- as.numeric(samples.test[,"y"])
+        
+        fit.cv.opt <- cv_opt.score(Y.train, X.train, R0, R1, 5, my.lambda.seq)
+        model.sm.flda <- opt.score(Y.train, X.train, R0, R1, fit.cv.opt$min_lambda)
+        result.sm.flda <- test_acc(model.sm.flda, X.test, Y.test)
+        result1.50[i] <- result.sm.flda$accuracy
+}
+
+boxplot(result1.50)
+
+result2.50 <- rep(0, 50)
+
+for(i in 1:50){
+        
+        samples <- mysamples(eigV,3,50)
+        samples <- samples[order(samples$y),]
+        
+        X.train <- as.matrix(samples[,1:642])
+        Y.train <- as.matrix(samples[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.train <- as.numeric(samples[,"y"])
+        
+        samples.test <- mysamples(eigV,3,50)
+        samples.test <- samples.test[order(samples.test$y),]
+        
+        X.test <- as.matrix(samples.test[,1:642])
+        Y.test <- as.matrix(samples.test[,c("y_indice.1","y_indice.2","y_indice.3")])
+        y.test <- as.numeric(samples.test[,"y"])
+        
+        result.presmooth <- pre.smooth(y.train, y.test, X.train, X.test, R0, R1, my.lambda.seq)
+        result2.50[i] <- result.presmooth$accuracy
+        
+}
+
+boxplot(result2.50)
+
+df<- data.frame(accuracy=c(result1.50, result1.100, result2.50, result2.100), n=c(rep(150,50),rep(300,100),rep(150,50),rep(300,100)), method=c(rep("SM-FLDA",150), rep("Pre-smoothing",150)), method_n=c(rep("SM-FLDA, n=150", 50),rep("SM-FLDA, n=300",100),rep("Pre-smoothing, n=150", 50),rep("Pre-smoothing, n=300",100)))
